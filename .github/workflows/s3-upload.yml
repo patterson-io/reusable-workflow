@@ -33,7 +33,7 @@ jobs:
 
       - name: Get temp credentials using id token. 
         run: |
-          CREDENTIALS=$(aws sts assume-role-with-web-identity  --role-arn 'arn:aws:iam::151347512159:role/github-oidc-test' --role-session-name 'samplerolesession' --web-identity-token ${{ steps.idtoken.outputs.id_token }} --query Credentials)
+          CREDENTIALS=$(aws sts assume-role-with-web-identity  --role-arn 'arn:aws:iam::554800135360:role/github-oidc-test' --role-session-name 'samplerolesession' --web-identity-token ${{ steps.idtoken.outputs.id_token }} --query Credentials)
           AID=$(echo $CREDENTIALS | jq -rc '.AccessKeyId')
           AKEY=$(echo $CREDENTIALS | jq -rc '.SecretAccessKey')
           STOKEN=$(echo $CREDENTIALS | jq -rc '.SessionToken')

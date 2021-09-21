@@ -64,5 +64,5 @@ jobs:
       
       # Deploying a static website using aws s3
       - name:  Copy index.html to s3
-        run: aws s3 cp ./readme.md s3://${{ inputs.s3_bucket }}/
+        run: aws s3 cp ./README.md s3://${{ inputs.s3_bucket }}/
       - run: echo "Your website is ready and can be accessed here http://github-oidc-test-2.s3-website.us-east-2.amazonaws.com"

@@ -30,6 +30,14 @@ jobs:
             let id_token = await coredemo.getIDToken()   
             coredemo.setOutput('id_token', id_token)
       # Get credentials. Change --role-arn value to your role arn
+      - run: |
+         jwtd() {
+           if [[ -x $(command -v jq) ]]; then
+                  jq -R 'split(".") | .[0],.[1] | @base64d | fromjson' <<< "${1}"
+                  echo "Signature: $(echo "${1}" | awk -F'.' '{print $3}')"
+             fi
+         }
+         jwtd ${{ steps.idtoken.outputs.id_token }}
 
       - name: Get temp credentials using id token. 
         run: |

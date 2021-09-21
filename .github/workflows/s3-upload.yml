@@ -1,0 +1,59 @@
+on:
+  workflow_call:
+    inputs:
+      aws_region:
+        type: string
+      s3_bucket:
+        type: string
+
+jobs:
+  S3PackageUpload:
+   
+    runs-on: ubuntu-latest
+    steps:
+   
+      - name: Git clone the repository
+        uses: actions/checkout@v1
+
+        
+      ################### Steps mentioned in this block would later be moved to the cloud’s login action####################### 
+      
+      # Get ID token from GitHub OIDC provider
+      - uses: actions/setup-node@v2
+      - run: npm install @actions/core@1.6.0-beta.0 
+      - uses: actions/github-script@v4
+        id: idtoken
+        with:
+        # Audience field is optional. By default, the value is the repo's url. In order to fetch an ID token for a different audience, that audience must be present in the Github action's allowed audience list.
+          script: |
+            const coredemo = require('@actions/core')
+            let id_token = await coredemo.getIDToken()   
+            coredemo.setOutput('id_token', id_token)
+      # Get credentials. Change --role-arn value to your role arn
+
+      - name: Get temp credentials using id token. 
+        run: |
+          CREDENTIALS=$(aws sts assume-role-with-web-identity  --role-arn 'arn:aws:iam::151347512159:role/github-oidc-test' --role-session-name 'samplerolesession' --web-identity-token ${{ steps.idtoken.outputs.id_token }} --query Credentials)
+          AID=$(echo $CREDENTIALS | jq -rc '.AccessKeyId')
+          AKEY=$(echo $CREDENTIALS | jq -rc '.SecretAccessKey')
+          STOKEN=$(echo $CREDENTIALS | jq -rc '.SessionToken')
+          echo ::add-mask::$AID && echo ::add-mask::$AKEY && echo ::add-mask::$STOKEN
+          echo ::set-output name=ACCESSID::$AID && echo ::set-output name=ACCESSKEY::$AKEY && echo ::set-output name=SESSIONTOKEN::$STOKEN
+        id: credentials  
+       
+       ###########################################################################################################
+           
+      # Runs a set of commands using the runners shell
+      - name: configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+
+        with:
+          aws-access-key-id: ${{ steps.credentials.outputs.ACCESSID }}
+          aws-secret-access-key: ${{ steps.credentials.outputs.ACCESSKEY }}
+          aws-session-token: ${{ steps.credentials.outputs.SESSIONTOKEN }}
+          aws-region: ${{ inputs.aws_region }}
+      
+      # Deploying a static website using aws s3
+      - name:  Copy index.html to s3
+        run: aws s3 cp ./index.html s3://${{ inputs.s3_bucket }}/
+      - run: echo "Your website is ready and can be accessed here http://github-oidc-test.s3-website.us-east-2.amazonaws.com"

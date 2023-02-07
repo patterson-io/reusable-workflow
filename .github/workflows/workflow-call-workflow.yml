@@ -1,0 +1,10 @@
+on:
+  pull_request:
+
+jobs:
+  do-something:
+    runs-on: ubuntu-latest
+    steps:
+      run: echo "Hello World"
+  call-local:
+    uses: ./github/workflows/local-workflow.yml

@@ -11,13 +11,10 @@ jobs:
     env:
       AWS_REGION: us-east-2
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
-   
-      - name: Git clone the repository
-        uses: actions/checkout@v1
-
-        
-      ################### Steps mentioned in this block would later be moved to the cloud’s login action####################### 
       - run: |
            IDTOKEN=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=sigstore" | jq -r '.value')
            echo $IDTOKEN

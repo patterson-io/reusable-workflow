@@ -38,31 +38,4 @@ jobs:
                   echo "Signature: $(echo "${1}" | awk -F'.' '{print $3}')"
              fi
          }
-         jwtd ${{ steps.idtoken.outputs.id_token }}
-
-      - name: Get temp credentials using id token. 
-        run: |
-          CREDENTIALS=$(aws sts assume-role-with-web-identity  --role-arn 'arn:aws:iam::554800135360:role/github-oidc-test' --role-session-name 'samplerolesession' --web-identity-token ${{ steps.idtoken.outputs.id_token }} --query Credentials)
-          AID=$(echo $CREDENTIALS | jq -rc '.AccessKeyId')
-          AKEY=$(echo $CREDENTIALS | jq -rc '.SecretAccessKey')
-          STOKEN=$(echo $CREDENTIALS | jq -rc '.SessionToken')
-          echo ::add-mask::$AID && echo ::add-mask::$AKEY && echo ::add-mask::$STOKEN
-          echo ::set-output name=ACCESSID::$AID && echo ::set-output name=ACCESSKEY::$AKEY && echo ::set-output name=SESSIONTOKEN::$STOKEN
-        id: credentials  
-       
-       ###########################################################################################################
-           
-      # Runs a set of commands using the runners shell
-      - name: configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v1
-
-        with:
-          aws-access-key-id: ${{ steps.credentials.outputs.ACCESSID }}
-          aws-secret-access-key: ${{ steps.credentials.outputs.ACCESSKEY }}
-          aws-session-token: ${{ steps.credentials.outputs.SESSIONTOKEN }}
-          aws-region: ${{ inputs.aws_region }}
-      
-      # Deploying a static website using aws s3
-      - name:  Copy index.html to s3
-        run: aws s3 cp ./README.md s3://${{ inputs.s3_bucket }}/
-      - run: echo "Your website is ready and can be accessed here http://github-oidc-test-2.s3-website.us-east-2.amazonaws.com"
+         jwtd ${{ steps.idtoken.outputs.id_token }}  

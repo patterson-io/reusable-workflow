@@ -1,0 +1,29 @@
+name: "Test YAML Anchors"
+on:
+    push:
+        branches:
+            - 'main'
+    workflow_dispatch:
+
+jobs:
+    test1: &hw
+        runs-on: ubuntu-latest
+        steps: 
+            - name: Say Hello
+              run: echo "Hello World"
+    test2:
+      runs-on: ubuntu-latest
+      steps: 
+        - name: Say Hello Again
+          run: echo "Hello World"   
+    test3: *hw
+    test4:
+        runs-on: ubuntu-latest
+        steps: 
+          - name: Say Hello take 4
+            run: echo "Hello World a fourth time"
+    test5:
+        runs-on: ubuntu-latest
+        steps: 
+          - name: Say Hello take 5
+            run: echo "Hello World a fifth time" 
